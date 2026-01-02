@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import io from 'socket.io-client';
@@ -15,6 +14,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRef } from 'react';
 
 // Lazy load components
 const Chart = dynamic(() => import('@/components/chart'), { ssr: false });
@@ -55,13 +56,40 @@ ChartJS.register(
 export default function Home() {
   const unit = getCryptoUnit();
   const smallestUnit = getSmallestUnit();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
+  const initialTimeRange = searchParams.get('timeRange') ?? '24h';
   const [blocks, setBlocks] = useState([]);
-  const [timeRange, setTimeRange] = useState('24h');
+  const [timeRange, setTimeRange] = useState(initialTimeRange);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [view, setView] = useState(unit);
+  const timeRangeRef = useRef(initialTimeRange);
+
+  useEffect(() => {
+    const paramRange = searchParams.get('timeRange') ?? '24h';
+    setTimeRange(paramRange);
+  }, [searchParams]);
+
+  useEffect(() => {
+    timeRangeRef.current = timeRange;
+  }, [timeRange]);
+
+  const handleTimeRangeChange = (newRange) => {
+    if (!newRange || newRange === timeRangeRef.current) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('timeRange', newRange);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    setTimeRange(newRange);
+  };
+
+  const baseButtonClass =
+    'px-4 py-2 text-sm font-medium uppercase text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white';
+  const activeButtonClass = ' bg-blue-700 text-white dark:bg-blue-600';
 
   const fetchBlocks = useCallback(async (range, page) => {
     setLoading(true);
@@ -75,12 +103,15 @@ export default function Home() {
         if (data.length < 10) {
           setHasMore(false);
         }
+        if (range !== timeRangeRef.current) {
+          return;
+        }
         setBlocks((prevBlocks) => {
           const allBlocks = [...prevBlocks, ...data];
           allBlocks.sort((a, b) => a.height - b.height);
           return allBlocks;
         });
-        if (data.length === 10) {
+        if (data.length === 10 && range === timeRangeRef.current) {
           fetchBlocks(range, page + 1);
         }
       } else {
@@ -421,26 +452,26 @@ export default function Home() {
       <h1 className="text-3xl font-bold mb-4">crypto-project</h1>
       <div className="inline-flex rounded-md shadow-sm" role="group">
         <button
-          onClick={() => setTimeRange('24h')}
-          className="px-4 py-2 text-sm font-medium uppercase text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+          onClick={() => handleTimeRangeChange('24h')}
+          className={`${baseButtonClass} rounded-s-lg${timeRange === '24h' ? activeButtonClass : ''}`}
         >
           24h
         </button>
         <button
-          onClick={() => setTimeRange('3d')}
-          className="px-4 py-2 text-sm font-medium uppercase text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+          onClick={() => handleTimeRangeChange('3d')}
+          className={`${baseButtonClass} border-l-0 border-r-0${timeRange === '3d' ? activeButtonClass : ''}`}
         >
           3d
         </button>
         <button
-          onClick={() => setTimeRange('1w')}
-          className="px-4 py-2 text-sm font-medium uppercase text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+          onClick={() => handleTimeRangeChange('1w')}
+          className={`${baseButtonClass} border-l-0 border-r-0${timeRange === '1w' ? activeButtonClass : ''}`}
         >
           1w
         </button>
         <button
-          onClick={() => setTimeRange('1m')}
-          className="px-4 py-2 text-sm font-medium uppercase text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
+          onClick={() => handleTimeRangeChange('1m')}
+          className={`${baseButtonClass} rounded-e-lg${timeRange === '1m' ? activeButtonClass : ''}`}
         >
           1m
         </button>
