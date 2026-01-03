@@ -34,7 +34,7 @@ ChartJS.register(
   {
     id: 'uniqueID',
     afterDraw: function (chart, easing) {
-      if (chart.tooltip._active && chart.tooltip._active.length) {
+      if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
         const activePoint = chart.tooltip._active[0];
         const ctx = chart.ctx;
         const x = activePoint.element.x;
@@ -45,7 +45,7 @@ ChartJS.register(
         ctx.moveTo(x, topY);
         ctx.lineTo(x, bottomY);
         ctx.lineWidth = 1;
-        ctx.strokeStyle = '#bababa';
+        ctx.strokeStyle = 'rgba(139, 141, 147, 0.5)';
         ctx.stroke();
         ctx.restore();
       }
@@ -86,10 +86,6 @@ export default function Home() {
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
     setTimeRange(newRange);
   };
-
-  const baseButtonClass =
-    'px-4 py-2 text-sm font-medium uppercase text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white';
-  const activeButtonClass = ' bg-blue-700 text-white dark:bg-blue-600';
 
   const fetchBlocks = useCallback(async (range, page) => {
     setLoading(true);
@@ -161,43 +157,51 @@ export default function Home() {
     };
   }, []);
 
+  // Dark theme chart defaults
+  const chartTheme = {
+    color: '#8b8d93',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    titleColor: '#ffffff',
+    gridColor: 'rgba(255, 255, 255, 0.06)',
+  };
+
   const chartBlockFeeRates = {
     labels: blocks.map((block) => block.height),
     datasets: [
       {
         label: 'Min',
         data: blocks.map((block) => block.minfeerate),
-        backgroundColor: 'rgba(216, 27, 96, 1)',
+        backgroundColor: 'rgba(239, 68, 68, 0.9)',
       },
       {
         label: '10th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[0]),
-        backgroundColor: 'rgba(142, 36, 170, 1)',
+        backgroundColor: 'rgba(168, 85, 247, 0.9)',
       },
       {
         label: '25th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[1]),
-        backgroundColor: 'rgba(30, 136, 229, 1)',
+        backgroundColor: 'rgba(59, 130, 246, 0.9)',
       },
       {
         label: 'Median',
         data: blocks.map((block) => block.feerate_percentiles[2]),
-        backgroundColor: 'rgba(124, 179, 66, 1)',
+        backgroundColor: 'rgba(34, 197, 94, 0.9)',
       },
       {
         label: '75th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[3]),
-        backgroundColor: 'rgba(253, 216, 53, 1)',
+        backgroundColor: 'rgba(249, 115, 22, 0.9)',
       },
       {
         label: '90th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[4]),
-        backgroundColor: 'rgba(109, 76, 65, 1)',
+        backgroundColor: 'rgba(234, 179, 8, 0.9)',
       },
       {
         label: 'Max',
         data: blocks.map((block) => block.maxfeerate),
-        backgroundColor: 'rgba(110, 112, 121, 1)',
+        backgroundColor: 'rgba(148, 163, 184, 0.9)',
         hidden: true,
       },
     ],
@@ -205,15 +209,29 @@ export default function Home() {
 
   const optionsBlockFeeRates = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
       title: {
-        display: true,
-        text: 'Block Fee Rates',
+        display: false,
       },
       legend: {
         display: true,
+        labels: {
+          color: chartTheme.color,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 16,
+          font: { size: 11 },
+        },
       },
       tooltip: {
+        backgroundColor: 'rgba(19, 22, 27, 0.95)',
+        titleColor: '#ffffff',
+        bodyColor: '#8b8d93',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: function (context) {
             let label = context.dataset.label || '';
@@ -240,17 +258,23 @@ export default function Home() {
         title: {
           display: true,
           text: 'Block Height',
+          color: chartTheme.color,
         },
         stacked: true,
+        ticks: { color: chartTheme.color },
+        grid: { color: chartTheme.gridColor },
       },
       y: {
         type: 'linear',
         title: {
           display: true,
-          text: `Fee Rate (${smallestUnit}oshis per virtual byte)`,
+          text: `Fee Rate (${smallestUnit}/vB)`,
+          color: chartTheme.color,
         },
         stacked: true,
         min: 0,
+        ticks: { color: chartTheme.color },
+        grid: { color: chartTheme.gridColor },
       },
     },
   };
@@ -259,13 +283,13 @@ export default function Home() {
     {
       label: 'Subsidy',
       data: blocks.map((block) => block.subsidy / 100000000),
-      backgroundColor: 'rgba(255, 159, 0, 1)',
+      backgroundColor: 'rgba(249, 115, 22, 0.9)',
       view: unit,
     },
     {
       label: 'Fees',
       data: blocks.map((block) => block.totalfee / 100000000),
-      backgroundColor: 'rgba(10, 171, 41, 1)',
+      backgroundColor: 'rgba(34, 197, 94, 0.9)',
       view: unit,
     },
     {
@@ -273,7 +297,7 @@ export default function Home() {
       data: blocks.map(
         (block) => (block.subsidy / (block.subsidy + block.totalfee)) * 100
       ),
-      backgroundColor: 'rgba(255, 159, 0, 1)',
+      backgroundColor: 'rgba(249, 115, 22, 0.9)',
       view: 'Percentage',
     },
     {
@@ -281,7 +305,7 @@ export default function Home() {
       data: blocks.map(
         (block) => (block.totalfee / (block.subsidy + block.totalfee)) * 100
       ),
-      backgroundColor: 'rgba(10, 171, 41, 1)',
+      backgroundColor: 'rgba(34, 197, 94, 0.9)',
       view: 'Percentage',
     },
   ];
@@ -295,15 +319,29 @@ export default function Home() {
 
   const optionsBlockFeeVsSubsidy = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
       title: {
-        display: true,
-        text: 'Block Fees Vs Subsidy',
+        display: false,
       },
       legend: {
         display: true,
+        labels: {
+          color: chartTheme.color,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 16,
+          font: { size: 11 },
+        },
       },
       tooltip: {
+        backgroundColor: 'rgba(19, 22, 27, 0.95)',
+        titleColor: '#ffffff',
+        bodyColor: '#8b8d93',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: function (context) {
             let label = context.dataset.label || '';
@@ -330,18 +368,24 @@ export default function Home() {
         title: {
           display: true,
           text: 'Block Height',
+          color: chartTheme.color,
         },
         stacked: true,
+        ticks: { color: chartTheme.color },
+        grid: { color: chartTheme.gridColor },
       },
       y: {
         type: 'linear',
         title: {
           display: true,
           text: view === unit ? `Value (${unit})` : 'Percentage of Reward (%)',
+          color: chartTheme.color,
         },
         stacked: true,
         min: 0,
         max: view === unit ? undefined : 100,
+        ticks: { color: chartTheme.color },
+        grid: { color: chartTheme.gridColor },
       },
     },
   };
@@ -354,8 +398,10 @@ export default function Home() {
         data: blocks.map(
           (block) => (block.subsidy + block.totalfee) / 100000000
         ),
-        borderColor: 'rgba(255, 159, 0, 1)',
-        backgroundColor: 'rgba(255, 159, 0, 0.5)',
+        borderColor: 'rgba(249, 115, 22, 1)',
+        backgroundColor: 'rgba(249, 115, 22, 0.2)',
+        fill: true,
+        tension: 0.4,
         yAxisID: 'y',
       },
       {
@@ -366,15 +412,19 @@ export default function Home() {
             ((block.subsidy + block.totalfee) / 100000000)
           ).toFixed(2)
         ),
-        borderColor: 'rgba(10, 171, 41, 1)',
-        backgroundColor: 'rgba(10, 171, 41, 0.5)',
+        borderColor: 'rgba(34, 197, 94, 1)',
+        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+        fill: true,
+        tension: 0.4,
         yAxisID: 'y1',
       },
       {
         label: `Block Value (${unit})`,
         data: blocks.map((block) => block.total_out / 100000000),
-        borderColor: 'rgb(70, 70, 70)',
-        backgroundColor: 'rgba(70, 70, 70, 0.5)',
+        borderColor: 'rgba(148, 163, 184, 1)',
+        backgroundColor: 'rgba(148, 163, 184, 0.2)',
+        fill: true,
+        tension: 0.4,
         hidden: true,
       },
     ],
@@ -382,15 +432,29 @@ export default function Home() {
 
   const optionsBlockRewards = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
       title: {
-        display: true,
-        text: 'Block Rewards',
+        display: false,
       },
       legend: {
         display: true,
+        labels: {
+          color: chartTheme.color,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 16,
+          font: { size: 11 },
+        },
       },
       tooltip: {
+        backgroundColor: 'rgba(19, 22, 27, 0.95)',
+        titleColor: '#ffffff',
+        bodyColor: '#8b8d93',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: function (context) {
             let label = context.dataset.label || '';
@@ -421,122 +485,272 @@ export default function Home() {
         title: {
           display: true,
           text: 'Block Height',
+          color: chartTheme.color,
         },
+        ticks: { color: chartTheme.color },
+        grid: { color: chartTheme.gridColor },
       },
       y: {
         type: 'linear',
         title: {
           display: true,
           text: `Value (${unit})`,
+          color: chartTheme.color,
         },
         position: 'left',
+        ticks: { color: chartTheme.color },
+        grid: { color: chartTheme.gridColor },
       },
       y1: {
         type: 'linear',
         title: {
           display: true,
           text: 'Value (USD)',
+          color: chartTheme.color,
         },
         position: 'right',
+        ticks: { color: chartTheme.color },
+        grid: { display: false },
       },
     },
     datasets: {
       line: {
         pointRadius: 0,
+        borderWidth: 2,
       },
     },
   };
 
+  // Calculate summary stats
+  const totalBlocks = blocks.length;
+  const avgReward = totalBlocks > 0 
+    ? (blocks.reduce((sum, b) => sum + (b.subsidy + b.totalfee) / 100000000, 0) / totalBlocks).toFixed(4)
+    : 0;
+  const latestBlock = blocks.length > 0 ? blocks[blocks.length - 1] : null;
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">crypto-project</h1>
-      <div className="inline-flex rounded-md shadow-sm" role="group">
-        <button
-          onClick={() => handleTimeRangeChange('24h')}
-          className={`${baseButtonClass} rounded-s-lg${timeRange === '24h' ? activeButtonClass : ''}`}
-        >
-          24h
-        </button>
-        <button
-          onClick={() => handleTimeRangeChange('3d')}
-          className={`${baseButtonClass} border-l-0 border-r-0${timeRange === '3d' ? activeButtonClass : ''}`}
-        >
-          3d
-        </button>
-        <button
-          onClick={() => handleTimeRangeChange('1w')}
-          className={`${baseButtonClass} border-l-0 border-r-0${timeRange === '1w' ? activeButtonClass : ''}`}
-        >
-          1w
-        </button>
-        <button
-          onClick={() => handleTimeRangeChange('1m')}
-          className={`${baseButtonClass} rounded-e-lg${timeRange === '1m' ? activeButtonClass : ''}`}
-        >
-          1m
-        </button>
-      </div>
-      <div className="mt-4 mb-8 overflow-x-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <ul className="flex space-x-4">
-          {blocks
-            .slice()
-            .reverse()
-            .map((block, index) => (
-              <BlockItem key={index} block={block} />
-            ))}
-        </ul>
-      </div>
-      {loading && <LoadingSpinner />}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Block Fee Rates</h2>
-        <p className="mb-4">
-          The fee rate is the total fees divided by the block size in virtual
-          bytes.
-        </p>
-        <Chart
-          type="bar"
-          data={chartBlockFeeRates}
-          options={optionsBlockFeeRates}
-        />
-      </div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Block Fees Vs Subsidy</h2>
-        <p className="mb-4">
-          The block subsidy is the amount of new bitcoins awarded to the miner
-          for each block. The total fees are the sum of all transaction fees in
-          the block.
-        </p>
-        <div className="inline-flex rounded-md shadow-sm" role="group">
-          <button
-            onClick={() => setView(unit)}
-            className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
-          >
-            {unit} View
-          </button>
-          <button
-            onClick={() => setView('Percentage')}
-            className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white"
-          >
-            Percentage View
-          </button>
+    <div className="dashboard-layout">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <span className="logo-text">BlockExplorer</span>
         </div>
-        <Chart
-          type="bar"
-          data={chartBlockFeeVsSubsidy}
-          options={optionsBlockFeeVsSubsidy}
-        />
-      </div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Block Rewards</h2>
-        <p className="mb-4">
-          The block reward is the sum of the block subsidy and the total fees.
-        </p>
-        <Chart
-          type="line"
-          data={chartBlockRewards}
-          options={optionsBlockRewards}
-        />
-      </div>
+
+        <nav className="sidebar-nav">
+          <div className="nav-section">
+            <span className="nav-section-title">General</span>
+            <a href="#" className="sidebar-item active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              Dashboard
+            </a>
+            <a href="#blocks" className="sidebar-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18M9 21V9" />
+              </svg>
+              Blocks
+            </a>
+            <a href="#charts" className="sidebar-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 20V10M12 20V4M6 20v-6" />
+              </svg>
+              Charts
+            </a>
+          </div>
+
+          <div className="nav-section">
+            <span className="nav-section-title">Analytics</span>
+            <a href="#fee-rates" className="sidebar-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+              </svg>
+              Fee Rates
+            </a>
+            <a href="#rewards" className="sidebar-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+              Rewards
+            </a>
+          </div>
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="glass-card" style={{ padding: '12px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Network Status</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span className="status-dot"></span>
+              <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Connected</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Header */}
+        <header className="content-header">
+          <div>
+            <h1 className="page-title">Dashboard</h1>
+            <p className="page-subtitle">Real-time blockchain analytics</p>
+          </div>
+          
+          {/* Time Range Selector */}
+          <div className="time-range-selector">
+            {['24h', '3d', '1w', '1m'].map((range) => (
+              <button
+                key={range}
+                onClick={() => handleTimeRangeChange(range)}
+                className={`time-pill ${timeRange === range ? 'active' : ''}`}
+              >
+                {range}
+              </button>
+            ))}
+          </div>
+        </header>
+
+        {/* Stats Cards */}
+        <div className="stats-grid">
+          <div className="glass-card stat-card">
+            <div className="stat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+              </svg>
+            </div>
+            <div className="stat-content">
+              <span className="stat-label">Total Blocks</span>
+              <span className="stat-value">{totalBlocks}</span>
+            </div>
+          </div>
+
+          <div className="glass-card stat-card">
+            <div className="stat-icon orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+              </svg>
+            </div>
+            <div className="stat-content">
+              <span className="stat-label">Avg Reward</span>
+              <span className="stat-value">{avgReward} {unit}</span>
+            </div>
+          </div>
+
+          <div className="glass-card stat-card">
+            <div className="stat-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+            </div>
+            <div className="stat-content">
+              <span className="stat-label">Latest Block</span>
+              <span className="stat-value">{latestBlock ? `#${latestBlock.height}` : '-'}</span>
+            </div>
+          </div>
+
+          <div className="glass-card stat-card">
+            <div className="stat-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+            </div>
+            <div className="stat-content">
+              <span className="stat-label">Time Range</span>
+              <span className="stat-value">{timeRange.toUpperCase()}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading State */}
+        {loading && <LoadingSpinner />}
+
+        {/* Blocks Scroll Section */}
+        <section id="blocks" className="content-section">
+          <div className="section-header">
+            <h2 className="section-title">Recent Blocks</h2>
+            <span className="section-badge">{blocks.length} blocks</span>
+          </div>
+          <div className="blocks-scroll">
+            {blocks
+              .slice()
+              .reverse()
+              .map((block, index) => (
+                <BlockItem key={index} block={block} />
+              ))}
+          </div>
+        </section>
+
+        {/* Charts Section */}
+        <section id="charts" className="content-section">
+          <div className="charts-grid">
+            {/* Fee Rates Chart */}
+            <div id="fee-rates" className="glass-card chart-container">
+              <div className="chart-header">
+                <h3 className="chart-title">Block Fee Rates</h3>
+                <p className="chart-subtitle">Fee rate distribution per block ({smallestUnit}/vB)</p>
+              </div>
+              <Chart
+                type="bar"
+                data={chartBlockFeeRates}
+                options={optionsBlockFeeRates}
+              />
+            </div>
+
+            {/* Fees vs Subsidy Chart */}
+            <div className="glass-card chart-container">
+              <div className="chart-header">
+                <div>
+                  <h3 className="chart-title">Fees vs Subsidy</h3>
+                  <p className="chart-subtitle">Block subsidy compared to transaction fees</p>
+                </div>
+                <div className="chart-controls">
+                  <button
+                    onClick={() => setView(unit)}
+                    className={`time-pill ${view === unit ? 'active' : ''}`}
+                  >
+                    {unit}
+                  </button>
+                  <button
+                    onClick={() => setView('Percentage')}
+                    className={`time-pill ${view === 'Percentage' ? 'active' : ''}`}
+                  >
+                    %
+                  </button>
+                </div>
+              </div>
+              <Chart
+                type="bar"
+                data={chartBlockFeeVsSubsidy}
+                options={optionsBlockFeeVsSubsidy}
+              />
+            </div>
+
+            {/* Rewards Chart */}
+            <div id="rewards" className="glass-card chart-container full-width">
+              <div className="chart-header">
+                <h3 className="chart-title">Block Rewards</h3>
+                <p className="chart-subtitle">Total miner rewards over time ({unit} and USD)</p>
+              </div>
+              <Chart
+                type="line"
+                data={chartBlockRewards}
+                options={optionsBlockRewards}
+              />
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
