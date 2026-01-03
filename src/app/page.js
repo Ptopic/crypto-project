@@ -13,6 +13,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useRef } from 'react';
@@ -31,6 +32,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
+  Filler,
   {
     id: 'uniqueID',
     afterDraw: function (chart, easing) {
@@ -165,43 +167,60 @@ export default function Home() {
     gridColor: 'rgba(255, 255, 255, 0.06)',
   };
 
+  const createBarGradient = (r, g, b) => {
+    return (context) => {
+      const chart = context.chart;
+      const { ctx, chartArea } = chart;
+      
+      if (!chartArea) {
+        return `rgba(${r}, ${g}, ${b}, 1)`;
+      }
+      
+      const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+      gradient.addColorStop(0, `rgba(${Math.floor(r * 0.3)}, ${Math.floor(g * 0.3)}, ${Math.floor(b * 0.3)}, 1)`);
+      gradient.addColorStop(0.5, `rgba(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)}, 1)`);
+      gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 1)`);
+      return gradient;
+    };
+  };
+
   const chartBlockFeeRates = {
     labels: blocks.map((block) => block.height),
     datasets: [
       {
         label: 'Min',
         data: blocks.map((block) => block.minfeerate),
-        backgroundColor: 'rgba(239, 68, 68, 0.9)',
+        backgroundColor: createBarGradient(255, 59, 92),
       },
       {
         label: '10th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[0]),
-        backgroundColor: 'rgba(168, 85, 247, 0.9)',
+        backgroundColor: createBarGradient(190, 75, 255),
       },
       {
         label: '25th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[1]),
-        backgroundColor: 'rgba(59, 130, 246, 0.9)',
+        backgroundColor: createBarGradient(59, 170, 255),
       },
       {
         label: 'Median',
         data: blocks.map((block) => block.feerate_percentiles[2]),
-        backgroundColor: 'rgba(34, 197, 94, 0.9)',
+        backgroundColor: createBarGradient(0, 255, 136),
       },
       {
         label: '75th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[3]),
-        backgroundColor: 'rgba(249, 115, 22, 0.9)',
+        backgroundColor: createBarGradient(255, 140, 50),
       },
       {
         label: '90th Percentile',
         data: blocks.map((block) => block.feerate_percentiles[4]),
-        backgroundColor: 'rgba(234, 179, 8, 0.9)',
+        backgroundColor: createBarGradient(255, 220, 40),
       },
       {
         label: 'Max',
         data: blocks.map((block) => block.maxfeerate),
-        backgroundColor: 'rgba(148, 163, 184, 0.9)',
+        backgroundColor: createBarGradient(180, 190, 210),
         hidden: true,
       },
     ],
@@ -283,13 +302,13 @@ export default function Home() {
     {
       label: 'Subsidy',
       data: blocks.map((block) => block.subsidy / 100000000),
-      backgroundColor: 'rgba(249, 115, 22, 0.9)',
+      backgroundColor: createBarGradient(255, 140, 50),
       view: unit,
     },
     {
       label: 'Fees',
       data: blocks.map((block) => block.totalfee / 100000000),
-      backgroundColor: 'rgba(34, 197, 94, 0.9)',
+      backgroundColor: createBarGradient(0, 255, 136),
       view: unit,
     },
     {
@@ -297,7 +316,7 @@ export default function Home() {
       data: blocks.map(
         (block) => (block.subsidy / (block.subsidy + block.totalfee)) * 100
       ),
-      backgroundColor: 'rgba(249, 115, 22, 0.9)',
+      backgroundColor: createBarGradient(255, 140, 50),
       view: 'Percentage',
     },
     {
@@ -305,7 +324,7 @@ export default function Home() {
       data: blocks.map(
         (block) => (block.totalfee / (block.subsidy + block.totalfee)) * 100
       ),
-      backgroundColor: 'rgba(34, 197, 94, 0.9)',
+      backgroundColor: createBarGradient(0, 255, 136),
       view: 'Percentage',
     },
   ];
@@ -390,6 +409,21 @@ export default function Home() {
     },
   };
 
+  const createGradient = (r, g, b) => {
+    return (context) => {
+      const chart = context.chart;
+      const { ctx, chartArea } = chart;
+      if (!chartArea) {
+        return `rgba(${r}, ${g}, ${b}, 0.3)`;
+      }
+      const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.4)`);
+      gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, 0.15)`);
+      gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+      return gradient;
+    };
+  };
+
   const chartBlockRewards = {
     labels: blocks.map((block) => block.height),
     datasets: [
@@ -398,10 +432,16 @@ export default function Home() {
         data: blocks.map(
           (block) => (block.subsidy + block.totalfee) / 100000000
         ),
-        borderColor: 'rgba(249, 115, 22, 1)',
-        backgroundColor: 'rgba(249, 115, 22, 0.2)',
+        borderColor: 'rgba(255, 140, 50, 1)',
+        backgroundColor: createGradient(255, 140, 50),
         fill: true,
         tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: 'rgba(255, 140, 50, 1)',
+        pointHoverBorderColor: '#ffffff',
+        pointHoverBorderWidth: 2,
         yAxisID: 'y',
       },
       {
@@ -412,19 +452,27 @@ export default function Home() {
             ((block.subsidy + block.totalfee) / 100000000)
           ).toFixed(2)
         ),
-        borderColor: 'rgba(34, 197, 94, 1)',
-        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+        borderColor: 'rgba(0, 255, 136, 1)',
+        backgroundColor: createGradient(0, 255, 136),
         fill: true,
         tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: 'rgba(0, 255, 136, 1)',
+        pointHoverBorderColor: '#ffffff',
+        pointHoverBorderWidth: 2,
         yAxisID: 'y1',
       },
       {
         label: `Block Value (${unit})`,
         data: blocks.map((block) => block.total_out / 100000000),
-        borderColor: 'rgba(148, 163, 184, 1)',
-        backgroundColor: 'rgba(148, 163, 184, 0.2)',
+        borderColor: 'rgba(100, 200, 255, 1)',
+        backgroundColor: createGradient(100, 200, 255),
         fill: true,
         tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 0,
         hidden: true,
       },
     ],
