@@ -481,6 +481,10 @@ export default function Home() {
   const optionsBlockRewards = {
     responsive: true,
     maintainAspectRatio: true,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       title: {
         display: false,
@@ -496,6 +500,7 @@ export default function Home() {
         },
       },
       tooltip: {
+        enabled: true,
         backgroundColor: 'rgba(19, 22, 27, 0.95)',
         titleColor: '#ffffff',
         bodyColor: '#8b8d93',
@@ -503,7 +508,15 @@ export default function Home() {
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
+        displayColors: true,
         callbacks: {
+          title: function (context) {
+            const block = blocks[context[0].dataIndex];
+            if (block) {
+              return `Block #${block.height}`;
+            }
+            return '';
+          },
           label: function (context) {
             let label = context.dataset.label || '';
             if (label) {
@@ -511,17 +524,26 @@ export default function Home() {
             }
             if (context.parsed.y !== null) {
               if (context.dataset.label.includes('USD')) {
-                label += context.parsed.y + ' USD';
+                label += '$' + Number(context.parsed.y).toFixed(2);
               } else {
-                label += context.parsed.y + ` ${unit}`;
+                label += Number(context.parsed.y).toFixed(4) + ` ${unit}`;
               }
             }
             return label;
           },
-          afterLabel: function (context) {
-            const block = blocks[context.dataIndex];
+          footer: function (context) {
+            const block = blocks[context[0].dataIndex];
             if (block) {
-              return `Time: ${new Date(block.time * 1000).toLocaleString()}`;
+              const subsidy = (block.subsidy / 100000000).toFixed(4);
+              const fees = (block.totalfee / 100000000).toFixed(4);
+              const date = new Date(block.time * 1000).toLocaleString();
+              return [
+                '',
+                `Mining Reward: ${subsidy} ${unit}`,
+                `Transaction Fees: ${fees} ${unit}`,
+                `Transactions: ${block.nTx.toLocaleString()}`,
+                `Time: ${date}`
+              ].join('\n');
             }
             return '';
           },
