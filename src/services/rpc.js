@@ -1,5 +1,4 @@
 import bitcoinClient from '@/utils/bitcoinClient';
-import { setBlockData, getBlockData } from '@/utils/redisClient';
 import { getCryptoUnit } from '@/utils/cryptoUnits';
 
 export const getBlockCount = async () => {
@@ -29,47 +28,40 @@ export const fetchBlocks = async (start, end, startTime) => {
   for (let i = start; i > end && i > 0; i--) {
     try {
       const blockHash = await getBlockHash(i);
-      const cachedBlock = await getBlockData(unit, blockHash);
-      if (cachedBlock) {
-        if (cachedBlock.time < startTime) break;
-        blocks.unshift(cachedBlock);
-      } else {
-        const block = await getBlock(blockHash);
-        if (block.time < startTime) break;
-        const blockStats = await getBlockStats(blockHash);
+      const block = await getBlock(blockHash);
+      if (block.time < startTime) break;
+      const blockStats = await getBlockStats(blockHash);
 
-        // Extract the coinbase transaction
-        const coinbaseTx = block.tx[0];
-        const miner = await getMinerFromCoinbase(coinbaseTx, blockHash);
+      // Extract the coinbase transaction
+      const coinbaseTx = block.tx[0];
+      const miner = await getMinerFromCoinbase(coinbaseTx, blockHash);
 
-        // Get historical price data with timeout
-        const apiUrlBase =
-          unit === 'LTC'
-            ? 'https://litecoinspace.org/api/v1'
-            : 'https://mempool.space/api/v1';
-        
-        let price = 0;
-        try {
-          const priceResponse = await Promise.race([
-            fetch(`${apiUrlBase}/historical-price?currency=USD&timestamp=${block.time}`),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Price fetch timeout')), 5000))
-          ]);
-          const priceData = await priceResponse.json();
-          price = priceData?.prices?.[0]?.USD || 0;
-        } catch (priceError) {
-          console.warn(`Failed to fetch price for block ${i}:`, priceError.message);
-        }
+      // Get historical price data with timeout
+      const apiUrlBase =
+        unit === 'LTC'
+          ? 'https://litecoinspace.org/api/v1'
+          : 'https://mempool.space/api/v1';
 
-        const blockData = {
-          ...blockStats,
-          ...block,
-          miner,
-          price,
-        };
-
-        await setBlockData(unit, blockHash, blockData);
-        blocks.unshift(blockData);
+      let price = 0;
+      try {
+        const priceResponse = await Promise.race([
+          fetch(`${apiUrlBase}/historical-price?currency=USD&timestamp=${block.time}`),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Price fetch timeout')), 5000))
+        ]);
+        const priceData = await priceResponse.json();
+        price = priceData?.prices?.[0]?.USD || 0;
+      } catch (priceError) {
+        console.warn(`Failed to fetch price for block ${i}:`, priceError.message);
       }
+
+      const blockData = {
+        ...blockStats,
+        ...block,
+        miner,
+        price,
+      };
+
+      blocks.unshift(blockData);
     } catch (error) {
       console.error(`Error fetching block ${i}:`, error.message);
       // Continue with next block instead of failing completely

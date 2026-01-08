@@ -577,90 +577,27 @@ export default function Home() {
   const latestBlock = blocks.length > 0 ? blocks[blocks.length - 1] : null;
 
   return (
-    <div className="dashboard-layout">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          <div className="logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <span className="logo-text">BlockExplorer</span>
-        </div>
-
-        <nav className="sidebar-nav">
-          <div className="nav-section">
-            <span className="nav-section-title">General</span>
-            <a href="#" className="sidebar-item active">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
-              Dashboard
-            </a>
-            <a href="#blocks" className="sidebar-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M3 9h18M9 21V9" />
-              </svg>
-              Blocks
-            </a>
-            <a href="#charts" className="sidebar-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 20V10M12 20V4M6 20v-6" />
-              </svg>
-              Charts
-            </a>
-          </div>
-
-          <div className="nav-section">
-            <span className="nav-section-title">Analytics</span>
-            <a href="#fee-rates" className="sidebar-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-              </svg>
-              Fee Rates
-            </a>
-            <a href="#rewards" className="sidebar-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v6l4 2" />
-              </svg>
-              Rewards
-            </a>
-          </div>
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="glass-card" style={{ padding: '12px' }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Network Status</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span className="status-dot"></span>
-              <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Connected</span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
+    <div className="w-screen h-screen overflow-hidden bg-[radial-gradient(ellipse_80%_50%_at_20%_10%,rgba(34,197,94,0.08)_0%,transparent_50%),radial-gradient(ellipse_60%_40%_at_80%_80%,rgba(59,130,246,0.06)_0%,transparent_50%),radial-gradient(ellipse_50%_30%_at_50%_50%,rgba(168,85,247,0.04)_0%,transparent_50%)] bg-[#0d0f12]">
       {/* Main Content */}
-      <main className="main-content">
+      <main className="w-full h-screen overflow-y-auto px-8 py-6 flex flex-col gap-6">
         {/* Header */}
-        <header className="content-header">
+        <header className="flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h1 className="page-title">Dashboard</h1>
-            <p className="page-subtitle">Real-time blockchain analytics</p>
+            <h1 className="text-[28px] font-bold text-white m-0">Dashboard</h1>
+            <p className="text-sm text-[#8b8d93] mt-1 mb-0">Real-time blockchain analytics</p>
           </div>
-          
+
           {/* Time Range Selector */}
-          <div className="time-range-selector">
+          <div className="flex gap-2">
             {['24h', '3d', '1w', '1m'].map((range) => (
               <button
                 key={range}
                 onClick={() => handleTimeRangeChange(range)}
-                className={`time-pill ${timeRange === range ? 'active' : ''}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                  timeRange === range
+                    ? 'bg-[rgba(34,197,94,0.15)] text-[#22c55e] border-[#22c55e]'
+                    : 'bg-transparent text-[#8b8d93] border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.05)] hover:text-white'
+                }`}
               >
                 {range}
               </button>
@@ -669,53 +606,53 @@ export default function Home() {
         </header>
 
         {/* Stats Cards */}
-        <div className="stats-grid">
-          <div className="glass-card stat-card">
-            <div className="stat-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="bg-[rgba(19,22,27,0.8)] border border-[rgba(255,255,255,0.08)] rounded-2xl backdrop-blur-xl flex items-center gap-4 p-5">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[rgba(34,197,94,0.15)] text-[#22c55e]">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
               </svg>
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Total Blocks</span>
-              <span className="stat-value">{totalBlocks}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] text-[#8b8d93]">Total Blocks</span>
+              <span className="text-xl font-semibold text-white">{totalBlocks}</span>
             </div>
           </div>
 
-          <div className="glass-card stat-card">
-            <div className="stat-icon orange">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <div className="bg-[rgba(19,22,27,0.8)] border border-[rgba(255,255,255,0.08)] rounded-2xl backdrop-blur-xl flex items-center gap-4 p-5">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[rgba(249,115,22,0.15)] text-[#f97316]">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
               </svg>
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Avg Reward</span>
-              <span className="stat-value">{avgReward} {unit}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] text-[#8b8d93]">Avg Reward</span>
+              <span className="text-xl font-semibold text-white">{avgReward} {unit}</span>
             </div>
           </div>
 
-          <div className="glass-card stat-card">
-            <div className="stat-icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <div className="bg-[rgba(19,22,27,0.8)] border border-[rgba(255,255,255,0.08)] rounded-2xl backdrop-blur-xl flex items-center gap-4 p-5">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[rgba(59,130,246,0.15)] text-[#3b82f6]">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Latest Block</span>
-              <span className="stat-value">{latestBlock ? `#${latestBlock.height}` : '-'}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] text-[#8b8d93]">Latest Block</span>
+              <span className="text-xl font-semibold text-white">{latestBlock ? `#${latestBlock.height}` : '-'}</span>
             </div>
           </div>
 
-          <div className="glass-card stat-card">
-            <div className="stat-icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <div className="bg-[rgba(19,22,27,0.8)] border border-[rgba(255,255,255,0.08)] rounded-2xl backdrop-blur-xl flex items-center gap-4 p-5">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[rgba(168,85,247,0.15)] text-[#a855f7]">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 6v6l4 2" />
               </svg>
             </div>
-            <div className="stat-content">
-              <span className="stat-label">Time Range</span>
-              <span className="stat-value">{timeRange.toUpperCase()}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] text-[#8b8d93]">Time Range</span>
+              <span className="text-xl font-semibold text-white">{timeRange.toUpperCase()}</span>
             </div>
           </div>
         </div>
@@ -724,12 +661,14 @@ export default function Home() {
         {loading && <LoadingSpinner />}
 
         {/* Blocks Scroll Section */}
-        <section id="blocks" className="content-section">
-          <div className="section-header">
-            <h2 className="section-title">Recent Blocks</h2>
-            <span className="section-badge">{blocks.length} blocks</span>
+        <section id="blocks" className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold text-white m-0">Recent Blocks</h2>
+            <span className="bg-[rgba(34,197,94,0.15)] text-[#22c55e] text-xs font-medium px-2.5 py-1 rounded-xl">
+              {blocks.length} blocks
+            </span>
           </div>
-          <div className="blocks-scroll">
+          <div className="flex gap-4 overflow-x-auto py-4 px-1 -mx-1">
             {blocks
               .slice()
               .reverse()
@@ -740,13 +679,15 @@ export default function Home() {
         </section>
 
         {/* Charts Section */}
-        <section id="charts" className="content-section">
-          <div className="charts-grid">
+        <section id="charts" className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             {/* Fee Rates Chart */}
-            <div id="fee-rates" className="glass-card chart-container">
-              <div className="chart-header">
-                <h3 className="chart-title">Block Fee Rates</h3>
-                <p className="chart-subtitle">Fee rate distribution per block ({smallestUnit}/vB)</p>
+            <div id="fee-rates" className="bg-[rgba(19,22,27,0.8)] border border-[rgba(255,255,255,0.08)] rounded-2xl backdrop-blur-xl p-6">
+              <div className="flex justify-between items-start mb-5">
+                <div>
+                  <h3 className="text-base font-semibold text-white m-0 mb-1">Block Fee Rates</h3>
+                  <p className="text-[13px] text-[#8b8d93] m-0">Fee rate distribution per block ({smallestUnit}/vB)</p>
+                </div>
               </div>
               <Chart
                 type="bar"
@@ -756,22 +697,30 @@ export default function Home() {
             </div>
 
             {/* Fees vs Subsidy Chart */}
-            <div className="glass-card chart-container">
-              <div className="chart-header">
+            <div className="bg-[rgba(19,22,27,0.8)] border border-[rgba(255,255,255,0.08)] rounded-2xl backdrop-blur-xl p-6">
+              <div className="flex justify-between items-start mb-5">
                 <div>
-                  <h3 className="chart-title">Fees vs Subsidy</h3>
-                  <p className="chart-subtitle">Block subsidy compared to transaction fees</p>
+                  <h3 className="text-base font-semibold text-white m-0 mb-1">Fees vs Subsidy</h3>
+                  <p className="text-[13px] text-[#8b8d93] m-0">Block subsidy compared to transaction fees</p>
                 </div>
-                <div className="chart-controls">
+                <div className="flex gap-1.5">
                   <button
                     onClick={() => setView(unit)}
-                    className={`time-pill ${view === unit ? 'active' : ''}`}
+                    className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                      view === unit
+                        ? 'bg-[rgba(34,197,94,0.15)] text-[#22c55e] border-[#22c55e]'
+                        : 'bg-transparent text-[#8b8d93] border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.05)] hover:text-white'
+                    }`}
                   >
                     {unit}
                   </button>
                   <button
                     onClick={() => setView('Percentage')}
-                    className={`time-pill ${view === 'Percentage' ? 'active' : ''}`}
+                    className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer border ${
+                      view === 'Percentage'
+                        ? 'bg-[rgba(34,197,94,0.15)] text-[#22c55e] border-[#22c55e]'
+                        : 'bg-transparent text-[#8b8d93] border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.05)] hover:text-white'
+                    }`}
                   >
                     %
                   </button>
@@ -785,10 +734,12 @@ export default function Home() {
             </div>
 
             {/* Rewards Chart */}
-            <div id="rewards" className="glass-card chart-container full-width">
-              <div className="chart-header">
-                <h3 className="chart-title">Block Rewards</h3>
-                <p className="chart-subtitle">Total miner rewards over time ({unit} and USD)</p>
+            <div id="rewards" className="bg-[rgba(19,22,27,0.8)] border border-[rgba(255,255,255,0.08)] rounded-2xl backdrop-blur-xl p-6 lg:col-span-2">
+              <div className="flex justify-between items-start mb-5">
+                <div>
+                  <h3 className="text-base font-semibold text-white m-0 mb-1">Block Rewards</h3>
+                  <p className="text-[13px] text-[#8b8d93] m-0">Total miner rewards over time ({unit} and USD)</p>
+                </div>
               </div>
               <Chart
                 type="line"
